@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>AI太空争霸 - 诊断页</title>
+  <style>
+    body { margin: 20px; font-family: "Microsoft YaHei", sans-serif; background: #000; color: #fff; }
+    #debug { background: #222; padding: 10px; margin-bottom: 10px; }
+    .ai-card { background: #333; padding: 10px; margin: 5px; border-left: 3px solid; }
+  </style>
+</head>
+<body>
+  <div id="debug">等待连接...</div>
+  <div id="aiList"></div>
+
+  <script>
+    const PERSONALITY_LABELS = {
+      aggressive: '强攻型',
+      defensive: '防御型',
+      economic: '经营型',
+      tech: '科研型',
+      diplomatic: '外交型',
+      opportunist: '机会型',
+      gambler: '豪赌型'
+    };
+
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
+    let gameState = null;
+
+    ws.onopen = () => {
+      document.getElementById('debug').innerHTML = '已连接实时数据';
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === 'game_state') {
+          gameState = msg.data;
+
+          document.getElementById('debug').innerHTML = `
+            已收到对局数据 | 时刻：${gameState.currentTick} |
+            星球：${gameState.planets?.length} |
+            帝国：${gameState.aiStates?.length}
+          `;
+
+          if (!gameState.aiStates || gameState.aiStates.length === 0) {
+            document.getElementById('aiList').innerHTML = '当前没有帝国数据';
+            return;
+          }
+
+          const html = gameState.aiStates.map((ai, i) => {
+            const planets = gameState.planets.filter(p => p.owner === ai.id);
+            const totalMetal = planets.reduce((sum, p) => sum + (p.resources?.metal || 0), 0);
+
+            return `
+              <div class="ai-card" style="border-left-color: ${ai.color}">
+                <div style="color: ${ai.color}; font-weight: bold;">
+                  ${i + 1}. ${ai.name}（${PERSONALITY_LABELS[ai.personality] || ai.personality || '未知流派'}）
+                </div>
+                <div>星球：${planets.length} | 金属储备：${Math.floor(totalMetal)}</div>
+              </div>
+            `;
+          }).join('');
+
+          document.getElementById('aiList').innerHTML = html;
+        }
+      } catch (err) {
+        document.getElementById('debug').innerHTML = '解析失败：' + err.message;
+      }
+    };
+
+    ws.onerror = () => {
+      document.getElementById('debug').innerHTML = '实时连接异常';
+    };
+  </script>
+</body>
+</html>

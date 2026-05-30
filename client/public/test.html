@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>测试</title>
+</head>
+<body>
+  <div id="aiList"></div>
+  <div id="status"></div>
+  <script>
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
+    let gameState = null;
+
+    ws.onopen = () => {
+      document.getElementById('status').textContent = '实时连接已建立';
+    };
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'game_state') {
+        gameState = msg.data;
+        document.getElementById('status').textContent = '时刻：' + gameState.currentTick + '，帝国数：' + gameState.aiStates.length;
+
+        const html = gameState.aiStates.map((ai, i) => {
+          const planets = gameState.planets.filter(p => p.owner === ai.id);
+          return `<div style="border: 1px solid ${ai.color}; padding: 10px; margin: 5px;">
+            ${i+1}. ${ai.name} - 星球：${planets.length}
+          </div>`;
+        }).join('');
+
+        document.getElementById('aiList').innerHTML = html;
+      }
+    };
+
+    ws.onerror = (err) => {
+      document.getElementById('status').textContent = '连接错误';
+    };
+  </script>
+</body>
+</html>

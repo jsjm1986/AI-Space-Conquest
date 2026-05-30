@@ -3,7 +3,11 @@
 由 7 个性格各异的 AI 帝国自动推进的太空策略争霸赛。AI 完全自主决策——扩张、侦察、结盟、背叛、研发、调兵和开战——直到场上只剩最后一个存活帝国。你坐在最佳观战席上，实时观察这场持续演变的宇宙史诗。
 
 **[English Version](README_EN.md)**
-![Uploading ab59b35bec2b3f627e4796e33e4863ff.png…]()
+
+
+
+<img width="1920" height="1080" alt="ab59b35bec2b3f627e4796e33e4863ff" src="https://github.com/user-attachments/assets/a3cb2e8f-8378-46b8-a6da-a80019f3e71c" />
+
 
 ---
 
